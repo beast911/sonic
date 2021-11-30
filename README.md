@@ -211,11 +211,16 @@ Since Sonic uses [golang-asm](https://github.com/twitchyliquid64/golang-asm) as 
 import (
     "reflect"
     "github.com/bytedance/sonic"
+    "github.com/bytedance/sonic/option"
 )
 
 func init() {
     var v HugeStruct
+    // For most large types (nesting depth <= 5)
     err := sonic.Pretouch(reflect.TypeOf(v))
+    // If the type is too deep nesting (nesting depth > 5),
+    // you can set compile recursive depth in Pretouch for better stability in JIT.
+    err := sonic.Pretouch(reflect.TypeOf(v), option.WithCompileRecursiveDepth(depth))
 }
 ```
 **CAUTION:**  use the **STRUCT instead of its POINTER** to `Pretouch()`, otherwise it won't work when you pass the pointer to `Marshal()/Unmarshal()`!  
